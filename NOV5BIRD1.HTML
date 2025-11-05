@@ -2031,7 +2031,12 @@ const EMOJI_SETS = {
     EXCITEMENT: ['🤩', '🎉', '🥳', '💃', '🕺', '🙌', '🎊', '🎈', '✨', '💥'],
     COMPLAINT: ['😤', '😑', '🙄', '😒', '😮‍💨', '😩', '😫', '🤦', '💢'],
     FRIENDSHIP: ['🤝', '💕', '🥰', '😊', '🫂', '💖', '🌈', '✨'],
-    MYSTERY: ['👻', '🎃', '🌙', '⭐', '🔮', '🪄', '✨', '🌟', '💫']
+    MYSTERY: ['👻', '🎃', '🌙', '⭐', '🔮', '🪄', '✨', '🌟', '💫'],
+    ADVENTURE: ['🗺️', '🧭', '⛰️', '🏔️', '🌊', '🏝️', '🚀', '✈️', '🎒', '🏕️'],
+    CELEBRATION: ['🥂', '🍰', '🎂', '🎁', '🎀', '🏅', '🥇', '👑', '💎', '🎊'],
+    SPORTS: ['⚽', '🏀', '⚾', '🎾', '🏐', '🥏', '🏆', '🥅', '🎯', '🏁'],
+    FEAR: ['😨', '😱', '😰', '😧', '🫣', '😬', '💀', '👻', '🙀', '😵'],
+    MISCHIEF: ['😈', '😏', '🤫', '🤭', '😜', '😝', '🙃', '🤪', '😇', '🤷']
 };
 
 // Sentinel rotation tracking
@@ -2114,7 +2119,9 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             // Additional American names
             'William', 'Seth', 'Justin', 'Michelle', 'Romeo', 'Elizabeth', 'Anne', 'Brandon',
             'Samantha', 'Tyler', 'Ashley', 'Derek', 'Melissa', 'Trevor', 'Nicole', 'Dustin',
-            'Brittany', 'Marcus', 'Vanessa', 'Keith', 'Stephanie', 'Jeremy', 'Christina', 'Vincent'
+            'Brittany', 'Marcus', 'Vanessa', 'Keith', 'Stephanie', 'Jeremy', 'Christina', 'Vincent',
+            'Aiden', 'Brooke', 'Colin', 'Denise', 'Eugene', 'Felicity', 'Grant', 'Holly',
+            'Ian', 'Jasmine'
         ];
 
         // Squirrel name pool
@@ -2122,7 +2129,9 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             'Nutkin', 'Acorn', 'Hazel', 'Chester', 'Chip', 'Dale', 'Sandy', 'Rusty',
             'Whiskers', 'Scamper', 'Nibbles', 'Chipper', 'Fluffy', 'Bushy', 'Jumper', 'Chatter',
             'Twig', 'Branch', 'Leaf', 'Pinecone', 'Oak', 'Walnut', 'Pecan', 'Cashew',
-            'Almond', 'Peanut', 'Pistachio', 'Macadamia', 'Hazelnut', 'Chestnut'
+            'Almond', 'Peanut', 'Pistachio', 'Macadamia', 'Hazelnut', 'Chestnut',
+            'Butterscotch', 'Cinnamon', 'Ginger', 'Nutmeg', 'Maple', 'Clover', 'Hickory', 'Willow',
+            'Forrest', 'Dash'
         ];
 
         // Rat name pool
@@ -2130,7 +2139,9 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             'Remy', 'Splinter', 'Templeton', 'Rizzo', 'Socrates', 'Ben', 'Willard', 'Nicodemus',
             'Ratticus', 'Squeaky', 'Whiskers', 'Shadow', 'Midnight', 'Scurry', 'Sneaky', 'Nibbler',
             'Rascal', 'Bandit', 'Thief', 'Scavenger', 'Prowler', 'Slinky', 'Snitch', 'Whisper',
-            'Dusty', 'Smokey', 'Pepper', 'Ash', 'Coal', 'Soot'
+            'Dusty', 'Smokey', 'Pepper', 'Ash', 'Coal', 'Soot',
+            'Flicker', 'Dart', 'Twitch', 'Rustle', 'Scramble', 'Fidget', 'Rumble', 'Gnaw',
+            'Scratch', 'Shifty'
         ];
 
         // Crow name pool
@@ -2138,7 +2149,9 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             'Edgar', 'Poe', 'Raven', 'Corvus', 'Huginn', 'Muninn', 'Crowley', 'Morrigan',
             'Odin', 'Shadow', 'Midnight', 'Coal', 'Jet', 'Obsidian', 'Noir', 'Shade',
             'Phantom', 'Spectre', 'Ghost', 'Spirit', 'Wraith', 'Gloom', 'Dusk', 'Eclipse',
-            'Merlin', 'Salem', 'Gotham', 'Blackwing', 'Nightfall', 'Darkstar'
+            'Merlin', 'Salem', 'Gotham', 'Blackwing', 'Nightfall', 'Darkstar',
+            'Vesper', 'Onyx', 'Inky', 'Sable', 'Umbra', 'Nox', 'Tenebris', 'Erebus',
+            'Grimm', 'Vanta'
         ];
 
         // Owl name pool
@@ -2146,7 +2159,9 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             'Athena', 'Hoot', 'Archimedes', 'Hedwig', 'Errol', 'Pigwidgeon', 'Bubo', 'Jareth',
             'Glimmer', 'Twilight', 'Moonbeam', 'Starbright', 'Whisper', 'Silent', 'Hunter', 'Talon',
             'Screech', 'Barny', 'Horace', 'Minerva', 'Noctis', 'Luna', 'Celeste', 'Aurora',
-            'Sage', 'Wisdom', 'Oracle', 'Seer', 'Prophet', 'Mystic'
+            'Sage', 'Wisdom', 'Oracle', 'Seer', 'Prophet', 'Mystic',
+            'Nyx', 'Artemis', 'Merlin', 'Caspian', 'Solstice', 'Nimbus', 'Echo', 'Zephyr',
+            'Sterling', 'Mistral'
         ];
 
         // Tree name pool - WHIMSICAL NAMES!
@@ -2158,28 +2173,37 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             'Squire Sapwood', 'Prince Pinecone', 'King Knothole', 'Queen Quercus',
             'Chancellor Chestnut', 'Archbishop Ash', 'Duke Deciduous', 'Viscount Vine',
             'Baroness Birch', 'Earl Evergreen', 'Marquis Magnolia', 'Sultan Sycamore',
-            'Emperor Elder', 'Empress Elm', 'Tsar Tamarack', 'Pharaoh Fig'
+            'Emperor Elder', 'Empress Elm', 'Tsar Tamarack', 'Pharaoh Fig',
+            'Commander Cedar', 'Countess Cottonwood', 'Sir Sequoia', 'Lady Linden',
+            'Baron Beech', 'Princess Poplar', 'Marshal Mulberry', 'Governor Gum',
+            'Commodore Cypress', 'Duchess Dogwood'
         ];
 
         const FROG_NAME_POOL = [
             'Lily', 'Croaker', 'Hoppy', 'Ribbit', 'Splash', 'Puddles', 'Leap', 'Tadpole',
             'Marsh', 'Pond', 'Mossy', 'Cricket', 'Bullfrog', 'Peeper', 'Spring', 'Dewdrop',
             'Kermit', 'Freddy', 'Toad', 'Bog', 'Swampy', 'Mire', 'Jumper', 'Hopper',
-            'Greenie', 'Slimy', 'Webfoot', 'Croaky', 'Bumpy', 'Warty'
+            'Greenie', 'Slimy', 'Webfoot', 'Croaky', 'Bumpy', 'Warty',
+            'Skippy', 'Bouncer', 'Drizzle', 'Paddy', 'Murky', 'Flipper', 'Boggle', 'Sprout',
+            'Willow', 'Rushy'
         ];
 
         const KOI_NAME_POOL = [
             'Kohaku', 'Tancho', 'Sanke', 'Showa', 'Kujaku', 'Ogon', 'Asagi', 'Shusui',
             'Goldie', 'Shimmer', 'Glimmer', 'Flash', 'Suki', 'Hana', 'Yuki', 'Sakura',
             'Bubbles', 'Finley', 'Splash', 'Ripple', 'Current', 'Float', 'Drift', 'Glide',
-            'Pearl', 'Coral', 'Marina', 'Aqua', 'Wave', 'Tide'
+            'Pearl', 'Coral', 'Marina', 'Aqua', 'Wave', 'Tide',
+            'Kintaro', 'Mizuki', 'Haruki', 'Kaida', 'Naruto', 'Umi', 'Tsubasa', 'Hikari',
+            'Sora', 'Nami'
         ];
 
         const ANT_NAME_POOL = [
             'Scout', 'Worker', 'Tiny', 'Speedy', 'Marcher', 'Hauler', 'Digger', 'Builder',
             'Forager', 'Soldier', 'Crawler', 'Climber', 'Antony', 'Adam', 'Andy', 'Atlas',
             'Busy', 'Dotty', 'Bit', 'Chip', 'Crumb', 'Grain', 'Speck', 'Mite',
-            'Red', 'Black', 'Fire', 'Leaf', 'Carpenter', 'Harvester'
+            'Red', 'Black', 'Fire', 'Leaf', 'Carpenter', 'Harvester',
+            'Scurry', 'Hustle', 'Burrow', 'Trail', 'Pheromone', 'Mandible', 'Thorax', 'Colony',
+            'Swarm', 'Nibble'
         ];
 
         let squirrelFamilies = new Map(); // Map squirrel ID to name
@@ -2225,7 +2249,15 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
         const TREE_DEGRADATION_RATE = 0.25;
         const TREE_HEALTH_THRESHOLD = 0;
         const BIRD_VISION_RADIUS = 400; // Reduced from 500 for better gameplay balance
-        const BIRD_FOOD_VISION_RADIUS = 800; // Reduced from 1080 for better balance
+        const BIRD_FOOD_VISION_RADIUS = 800; // Base vision radius, will be scaled responsively
+
+        // Helper to get responsive vision radius
+        function getResponsiveVisionRadius(baseRadius = BIRD_FOOD_VISION_RADIUS) {
+            const scale = getResponsiveScale();
+            // Scale vision radius with screen size, with a minimum multiplier of 1.0
+            // On larger screens, birds can see further
+            return baseRadius * Math.max(1.0, scale);
+        }
         const RAT_VISION_RADIUS = 80;
         const SQUIRREL_VISION_RADIUS = 70;
         const STAR_COUNT = 100;
@@ -8781,9 +8813,10 @@ if (timeOfDay < 1 && Math.random() < 0.001) {
                 // Try to find food or worms
                 let foundFood = false;
 
-                // Expanded vision radius when hungry
+                // FIXED: Use responsive vision radius that scales with screen size
+                const baseVisionRadius = getResponsiveVisionRadius();
                 const visionRadius = this.hunger > HUNGER_CRITICAL_THRESHOLD ?
-                    BIRD_FOOD_VISION_RADIUS * 2 : BIRD_FOOD_VISION_RADIUS * 1.5;
+                    baseVisionRadius * 2 : baseVisionRadius * 1.5;
 
                 // Enhanced: Check for large food piles (ground flocking behavior with crowding)
                 // Count food items in clusters - tighter radius for concentrated piles
@@ -10057,8 +10090,10 @@ if ((isRaining || timeOfDay >= 1) && Math.random() < 0.4) { // 40% chance to see
 
                         // Check for state transitions
                         // PRIORITY: Check for player-added food FIRST (even when not hungry)
+                        // FIXED: Use responsive detection distance
+                        const playerFoodDetectionDist = 400 * getResponsiveScale();
                         const playerFood = foodItems.find(f => f.playerAdded &&
-                            distance(this.x, this.y, f.x, f.y) < 400 &&
+                            distance(this.x, this.y, f.x, f.y) < playerFoodDetectionDist &&
                             !this.isDangerZone(f.x, f.y));
 
                         if (playerFood && Math.random() < 0.80) {
@@ -10280,8 +10315,10 @@ if ((isRaining || timeOfDay >= 1) && Math.random() < 0.4) { // 40% chance to see
 
                             // PRIORITY: Check for player-added food FIRST (even when not hungry)
                             // V40 FIX: Only check after substantial perch time (90 seconds) so birds actually rest first
+                            // FIXED: Use responsive detection distance
+                            const perchFoodDetectionDist = 400 * getResponsiveScale();
                             const playerFoodFromPerch = foodItems.find(f => f.playerAdded &&
-                                distance(this.x, this.y, f.x, f.y) < 400 &&
+                                distance(this.x, this.y, f.x, f.y) < perchFoodDetectionDist &&
                                 !this.isDangerZone(f.x, f.y));
 
                             if (playerFoodFromPerch && this.stateTimer > 90000 && Math.random() < 0.15) {
@@ -11079,8 +11116,13 @@ if ((isRaining || timeOfDay >= 1) && Math.random() < 0.4) { // 40% chance to see
                             break;
                         }
 
-                        // End resting after a while or if hungry
-                        if (this.stateTimer > BIRD_STATE_DURATION.RESTING || this.hunger > HUNGER_CRITICAL_THRESHOLD - 100) {
+                        // FIXED: Birds should stay in birdhouses during night or rain
+                        // Only leave when it's daytime, not raining, or very hungry
+                        const shouldStayInBirdhouse = myBirdhouse && (timeOfDay >= 1 || isRaining) &&
+                                                      this.hunger < HUNGER_CRITICAL_THRESHOLD;
+
+                        // End resting after a while or if hungry, but stay in birdhouse during night/rain
+                        if (!shouldStayInBirdhouse && (this.stateTimer > BIRD_STATE_DURATION.RESTING || this.hunger > HUNGER_CRITICAL_THRESHOLD - 100)) {
                             // FIXED: Remove bird from birdhouse when leaving
                             if (myBirdhouse) {
                                 myBirdhouse.removeOccupant(this);
@@ -19439,10 +19481,20 @@ function spawnOwls() {
                 }
             }
 
+            // CRITICAL: Check audio context state before attempting to use it
+            if (!audioContext || audioContext.state === 'closed') {
+                console.warn("Audio context is closed, attempting recovery...");
+                persistentLog("Audio context closed, attempting recovery", DEBUG_LEVELS.WARNING);
+                if (!recoverAudioContext()) {
+                    return;
+                }
+            }
+
             // Check if audio context is in a usable state
             if (audioContext.state === 'suspended') {
                 audioContext.resume().catch(err => {
                     console.error("Failed to resume audio context in playNote:", err);
+                    persistentLog(`Failed to resume audio in playNote: ${err.message}`, DEBUG_LEVELS.ERROR);
                 });
                 return; // Skip this note, try again next time
             }
@@ -19506,15 +19558,42 @@ function spawnOwls() {
                 oscillator.start();
                 harmonicOscillators.forEach(h => h.osc.start());
 
-                // Stop all oscillators
-                oscillator.stop(audioContext.currentTime + duration);
-                harmonicOscillators.forEach(h => h.osc.stop(audioContext.currentTime + duration));
+                // Stop all oscillators - wrapped in try/catch to prevent crashes
+                try {
+                    oscillator.stop(audioContext.currentTime + duration);
+                    harmonicOscillators.forEach(h => {
+                        try {
+                            h.osc.stop(audioContext.currentTime + duration);
+                        } catch (stopErr) {
+                            // Silently handle oscillator stop errors
+                        }
+                    });
+                } catch (stopErr) {
+                    console.warn("Error stopping oscillators:", stopErr);
+                }
             } catch (e) {
                 console.error("Error playing note:", e);
+                persistentLog(`Error playing windchime note "${note}": ${e.message}`, DEBUG_LEVELS.ERROR);
+
                 // ENHANCED: Attempt recovery if audio context failed
-                if (e.message && (e.message.includes('AudioContext') || e.message.includes('destination'))) {
+                if (e.message && (e.message.includes('AudioContext') || e.message.includes('destination') || e.message.includes('closed'))) {
                     debugLog("Audio context error detected, attempting recovery...");
-                    recoverAudioContext();
+                    persistentLog("Audio context failed during playNote, attempting recovery", DEBUG_LEVELS.WARNING);
+
+                    // Mark that audio crashed so we can inform the user
+                    window.audioCrashDetected = true;
+
+                    // Attempt to recover
+                    setTimeout(() => {
+                        if (recoverAudioContext()) {
+                            debugLog("Audio context recovered successfully");
+                            persistentLog("Audio context recovered after playNote error", DEBUG_LEVELS.INFO);
+                            window.audioCrashDetected = false;
+                        } else {
+                            console.error("Audio context recovery failed");
+                            persistentLog("Audio context recovery failed after playNote error", DEBUG_LEVELS.ERROR);
+                        }
+                    }, 1000); // Wait 1 second before attempting recovery
                 }
             }
         }
@@ -19690,10 +19769,30 @@ function spawnOwls() {
                 conversationType = 'FRIENDSHIP';
                 primarySet = EMOJI_SETS.FRIENDSHIP;
                 secondarySet = EMOJI_SETS.STATES;
-            } else if (typeRoll < 0.5) {
+            } else if (typeRoll < 0.42) {
                 conversationType = 'NATURE';
                 primarySet = EMOJI_SETS.NATURE;
                 secondarySet = EMOJI_SETS.STATES;
+            } else if (typeRoll < 0.48) {
+                conversationType = 'ADVENTURE';
+                primarySet = EMOJI_SETS.ADVENTURE;
+                secondarySet = EMOJI_SETS.EXCITEMENT;
+            } else if (typeRoll < 0.54) {
+                conversationType = 'CELEBRATION';
+                primarySet = EMOJI_SETS.CELEBRATION;
+                secondarySet = EMOJI_SETS.EXCITEMENT;
+            } else if (typeRoll < 0.60) {
+                conversationType = 'SPORTS';
+                primarySet = EMOJI_SETS.SPORTS;
+                secondarySet = EMOJI_SETS.REACTIONS;
+            } else if (typeRoll < 0.66) {
+                conversationType = 'FEAR';
+                primarySet = EMOJI_SETS.FEAR;
+                secondarySet = EMOJI_SETS.REACTIONS;
+            } else if (typeRoll < 0.72) {
+                conversationType = 'MISCHIEF';
+                primarySet = EMOJI_SETS.MISCHIEF;
+                secondarySet = EMOJI_SETS.GOSSIP;
             } else {
                 // Truly random "show about nothing"
                 conversationType = 'ABSURD';
