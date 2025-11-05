@@ -651,9 +651,9 @@
                     // Use message hashing to track frequency
                     const messageHash = message.split(' ')[0] + message.split(' ')[1];
                     const now = Date.now();
-                    
+
                     // Only log this type of message once every 5 seconds
-                    if (!window.debugLogThrottling[messageHash] || 
+                    if (!window.debugLogThrottling[messageHash] ||
                         now - window.debugLogThrottling[messageHash] > 5000) {
                         console.log(`DEBUG: ${message}`);
                         window.debugLogThrottling[messageHash] = now;
@@ -663,7 +663,280 @@
                     console.log(`DEBUG: ${message}`);
                 }
             }
+            // Also log to persistent storage
+            persistentLog(message, level);
         }
+
+        // ========================================
+        // CRASH PREVENTION & DEBUGGING SYSTEM
+        // ========================================
+
+        // Persistent logging to survive page crashes
+        const MAX_LOG_ENTRIES = 500;
+        let logBuffer = [];
+
+        function persistentLog(message, level = DEBUG_LEVELS.INFO) {
+            try {
+                const timestamp = new Date().toISOString();
+                const logEntry = {
+                    time: timestamp,
+                    level: level === DEBUG_LEVELS.ERROR ? 'ERROR' : (level === DEBUG_LEVELS.WARNING ? 'WARN' : 'INFO'),
+                    msg: String(message)
+                };
+
+                // Add to buffer
+                logBuffer.push(logEntry);
+
+                // Keep buffer size manageable
+                if (logBuffer.length > MAX_LOG_ENTRIES) {
+                    logBuffer = logBuffer.slice(-MAX_LOG_ENTRIES);
+                }
+
+                // Save to localStorage periodically (every 10 logs)
+                if (logBuffer.length % 10 === 0) {
+                    try {
+                        localStorage.setItem('birdSimLog', JSON.stringify(logBuffer));
+                        localStorage.setItem('birdSimLastUpdate', timestamp);
+                    } catch (e) {
+                        // localStorage might be full, clear old data
+                        console.warn('localStorage full, clearing old logs');
+                        logBuffer = logBuffer.slice(-100);
+                        localStorage.setItem('birdSimLog', JSON.stringify(logBuffer));
+                    }
+                }
+            } catch (e) {
+                // Don't let logging errors crash the app
+                console.error('Logging error:', e);
+            }
+        }
+
+        // Save simulation state periodically
+        function saveSimulationState() {
+            try {
+                const state = {
+                    timestamp: new Date().toISOString(),
+                    uptime: Date.now() - (window.simStartTime || Date.now()),
+                    birdCount: (typeof birds !== 'undefined') ? birds.length : 0,
+                    babyBirdCount: (typeof babyBirds !== 'undefined') ? babyBirds.length : 0,
+                    eggCount: (typeof eggs !== 'undefined') ? eggs.length : 0,
+                    wormCount: (typeof worms !== 'undefined') ? worms.length : 0,
+                    ratCount: (typeof rats !== 'undefined') ? rats.length : 0,
+                    butterflyCount: (typeof butterflies !== 'undefined') ? butterflies.length : 0,
+                    treeCount: (typeof trees !== 'undefined') ? trees.length : 0,
+                    fps: (typeof currentFPS !== 'undefined') ? currentFPS : 0,
+                    dayNightCycle: (typeof dayNightCycleCount !== 'undefined') ? dayNightCycleCount : 0,
+                    mushroomMode: (typeof mushroomMode !== 'undefined') ? mushroomMode : false
+                };
+                localStorage.setItem('birdSimState', JSON.stringify(state));
+            } catch (e) {
+                console.error('Failed to save state:', e);
+            }
+        }
+
+        // Global error handlers
+        window.addEventListener('error', function(event) {
+            const errorMsg = `UNCAUGHT ERROR: ${event.message} at ${event.filename}:${event.lineno}:${event.colno}`;
+            console.error(errorMsg);
+            persistentLog(errorMsg, DEBUG_LEVELS.ERROR);
+            saveSimulationState();
+
+            // Don't prevent default - let error show in console
+            return false;
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            const errorMsg = `UNHANDLED PROMISE REJECTION: ${event.reason}`;
+            console.error(errorMsg);
+            persistentLog(errorMsg, DEBUG_LEVELS.ERROR);
+            saveSimulationState();
+        });
+
+        // Memory monitoring
+        let lastMemoryCheck = Date.now();
+        let memoryWarningIssued = false;
+
+        function checkMemory() {
+            try {
+                if (Date.now() - lastMemoryCheck < 30000) return; // Check every 30 seconds
+                lastMemoryCheck = Date.now();
+
+                // Count all entities
+                const totalEntities =
+                    (birds?.length || 0) +
+                    (babyBirds?.length || 0) +
+                    (eggs?.length || 0) +
+                    (worms?.length || 0) +
+                    (rats?.length || 0) +
+                    (butterflies?.length || 0) +
+                    (owls?.length || 0) +
+                    (crows?.length || 0) +
+                    (squirrels?.length || 0) +
+                    (frogs?.length || 0) +
+                    (fireflies?.length || 0) +
+                    (ants?.length || 0) +
+                    (birdPoops?.length || 0) +
+                    (lightningStrikes?.length || 0) +
+                    (puddles?.length || 0);
+
+                // Check if we have too many entities
+                if (totalEntities > 500) {
+                    if (!memoryWarningIssued) {
+                        const warnMsg = `Memory warning: ${totalEntities} total entities. Performance may degrade.`;
+                        console.warn(warnMsg);
+                        persistentLog(warnMsg, DEBUG_LEVELS.WARNING);
+                        memoryWarningIssued = true;
+                    }
+
+                    // Emergency cleanup if entities exceed 750
+                    if (totalEntities > 750) {
+                        emergencyCleanup();
+                    }
+                } else {
+                    memoryWarningIssued = false;
+                }
+
+                // Check performance API if available
+                if (performance.memory) {
+                    const memUsedMB = performance.memory.usedJSHeapSize / 1048576;
+                    const memLimitMB = performance.memory.jsHeapSizeLimit / 1048576;
+
+                    if (memUsedMB / memLimitMB > 0.9) {
+                        const msg = `Critical memory usage: ${memUsedMB.toFixed(0)}MB / ${memLimitMB.toFixed(0)}MB`;
+                        console.error(msg);
+                        persistentLog(msg, DEBUG_LEVELS.ERROR);
+                        emergencyCleanup();
+                    }
+                }
+            } catch (e) {
+                console.error('Memory check error:', e);
+            }
+        }
+
+        // Emergency cleanup to prevent crashes
+        function emergencyCleanup() {
+            try {
+                persistentLog('EMERGENCY CLEANUP TRIGGERED', DEBUG_LEVELS.WARNING);
+
+                // Remove excess entities
+                if (worms && worms.length > 20) {
+                    worms = worms.slice(-20);
+                    persistentLog(`Cleaned up worms: now ${worms.length}`, DEBUG_LEVELS.WARNING);
+                }
+                if (birdPoops && birdPoops.length > 30) {
+                    birdPoops = birdPoops.slice(-30);
+                    persistentLog(`Cleaned up bird poops: now ${birdPoops.length}`, DEBUG_LEVELS.WARNING);
+                }
+                if (butterflies && butterflies.length > 15) {
+                    butterflies = butterflies.slice(-15);
+                    persistentLog(`Cleaned up butterflies: now ${butterflies.length}`, DEBUG_LEVELS.WARNING);
+                }
+                if (fireflies && fireflies.length > 20) {
+                    fireflies = fireflies.slice(-20);
+                    persistentLog(`Cleaned up fireflies: now ${fireflies.length}`, DEBUG_LEVELS.WARNING);
+                }
+                if (ants && ants.length > 30) {
+                    ants = ants.slice(-30);
+                    persistentLog(`Cleaned up ants: now ${ants.length}`, DEBUG_LEVELS.WARNING);
+                }
+                if (puddles && puddles.length > 10) {
+                    puddles = puddles.slice(-10);
+                    persistentLog(`Cleaned up puddles: now ${puddles.length}`, DEBUG_LEVELS.WARNING);
+                }
+                if (lightningStrikes && lightningStrikes.length > 5) {
+                    lightningStrikes = [];
+                    persistentLog('Cleaned up lightning strikes', DEBUG_LEVELS.WARNING);
+                }
+
+                // Clear trails if mushroom mode is on
+                if (mushroomMode && birdTrails && birdTrails.length > 0) {
+                    for (const trail of birdTrails) {
+                        if (trail.positions && trail.positions.length > 50) {
+                            trail.positions = trail.positions.slice(-50);
+                        }
+                    }
+                    persistentLog('Cleaned up bird trails', DEBUG_LEVELS.WARNING);
+                }
+
+                saveSimulationState();
+            } catch (e) {
+                console.error('Emergency cleanup error:', e);
+                persistentLog(`Emergency cleanup failed: ${e.message}`, DEBUG_LEVELS.ERROR);
+            }
+        }
+
+        // Expose log viewer function
+        window.viewSimulationLogs = function() {
+            try {
+                const logs = JSON.parse(localStorage.getItem('birdSimLog') || '[]');
+                const state = JSON.parse(localStorage.getItem('birdSimState') || '{}');
+                const lastUpdate = localStorage.getItem('birdSimLastUpdate');
+
+                console.log('='.repeat(60));
+                console.log('BIRD SIMULATION - PERSISTENT LOGS');
+                console.log('='.repeat(60));
+                console.log(`Last update: ${lastUpdate || 'Never'}`);
+                console.log(`Total log entries: ${logs.length}`);
+                console.log('\nLast saved state:', state);
+                console.log('\nRecent logs (last 50):');
+                console.log('-'.repeat(60));
+
+                logs.slice(-50).forEach(entry => {
+                    console.log(`[${entry.time}] [${entry.level}] ${entry.msg}`);
+                });
+
+                console.log('='.repeat(60));
+                console.log('To clear logs: localStorage.removeItem("birdSimLog")');
+                console.log('To clear state: localStorage.removeItem("birdSimState")');
+
+                return { logs, state, lastUpdate };
+            } catch (e) {
+                console.error('Failed to load logs:', e);
+                return null;
+            }
+        };
+
+        // Clear old logs on startup
+        window.clearSimulationLogs = function() {
+            localStorage.removeItem('birdSimLog');
+            localStorage.removeItem('birdSimState');
+            localStorage.removeItem('birdSimLastUpdate');
+            logBuffer = [];
+            console.log('Simulation logs cleared');
+        };
+
+        // Start time tracking
+        window.simStartTime = Date.now();
+
+        // Check if we crashed previously
+        const lastState = localStorage.getItem('birdSimState');
+        if (lastState) {
+            try {
+                const state = JSON.parse(lastState);
+                const timeSinceLastUpdate = Date.now() - new Date(state.timestamp).getTime();
+
+                // If last update was more than 5 minutes ago, might have crashed
+                if (timeSinceLastUpdate > 300000) {
+                    console.warn('⚠️ Possible previous crash detected!');
+                    console.warn('Last simulation state:', state);
+                    console.warn('Time since last update:', Math.round(timeSinceLastUpdate / 60000), 'minutes');
+                    console.warn('Call viewSimulationLogs() to see what happened');
+
+                    persistentLog(`Restarted after ${Math.round(timeSinceLastUpdate / 60000)} minutes. Possible crash.`, DEBUG_LEVELS.WARNING);
+                }
+            } catch (e) {
+                console.error('Failed to check previous state:', e);
+            }
+        }
+
+        // Periodic state saving (every 60 seconds)
+        setInterval(saveSimulationState, 60000);
+
+        // Add memory check to be called from main loop
+        window.checkMemoryPeriodic = checkMemory;
+
+        console.log('✅ Crash prevention system initialized');
+        console.log('📊 Call viewSimulationLogs() to see persistent logs');
+        console.log('🧹 Call clearSimulationLogs() to clear all logs');
 
         // Info panel
         const infoPanel = document.getElementById('infoPanel');
@@ -20424,6 +20697,7 @@ function spawnOwls() {
         function updateAndDraw(timestamp) {
     if (!animationRunning) return;
 
+    try {
     // Calculate delta time with a max to prevent large jumps
     const now = Date.now();
     let deltaTime = Math.min(100, now - lastTime);
@@ -20468,6 +20742,11 @@ function spawnOwls() {
                 debugLog(`Reduced puddles to 8`);
             }
         }
+    }
+
+    // Check memory usage periodically
+    if (window.checkMemoryPeriodic) {
+        window.checkMemoryPeriodic();
     }
 
     // Update simulation time
@@ -21071,7 +21350,18 @@ for (let i = owls.length - 1; i >= 0; i--) {
     // Restore canvas state after camera transformations
     ctx.restore();
 
-    // Request next frame
+    } catch (error) {
+        // Critical error in animation loop - log it but try to keep running
+        const errorMsg = `CRITICAL ERROR in updateAndDraw: ${error.message}\nStack: ${error.stack}`;
+        console.error(errorMsg);
+        persistentLog(errorMsg, DEBUG_LEVELS.ERROR);
+        saveSimulationState();
+
+        // Try to continue the animation loop despite the error
+        // This prevents a single error from completely halting the simulation
+    }
+
+    // Request next frame (outside try-catch so it always executes)
     requestAnimationFrame(updateAndDraw);
 }
 
@@ -23240,6 +23530,32 @@ canvas.addEventListener('touchstart', (e) => {
         }
 
         // Initialize when page is loaded
+        // Save state before page unload
+        window.addEventListener('beforeunload', () => {
+            persistentLog('Page unloading - saving final state', DEBUG_LEVELS.INFO);
+            saveSimulationState();
+
+            // Flush log buffer to localStorage
+            try {
+                if (logBuffer.length > 0) {
+                    localStorage.setItem('birdSimLog', JSON.stringify(logBuffer));
+                    localStorage.setItem('birdSimLastUpdate', new Date().toISOString());
+                }
+            } catch (e) {
+                console.error('Failed to save logs on unload:', e);
+            }
+        });
+
+        // Additional cleanup on page unload
+        window.addEventListener('unload', () => {
+            // Clean up any remaining resources
+            if (audioContext && audioContext.state !== 'closed') {
+                audioContext.close().catch(err => {
+                    console.error('Failed to close audio context:', err);
+                });
+            }
+        });
+
         window.addEventListener('load', () => {
             initialize();
         });
