@@ -1914,18 +1914,23 @@ let lastEmojiConversationTime = 0;
 
 // ENHANCED: Emoji sets for different situations with much more variety
 const EMOJI_SETS = {
-    FOOD: ['🌽', '🍞', '🐛', '🌰', '🍇', '🥜', '🌾', '🍒', '🫐', '🍓', '🌻', '🥐', '🧀', '🥨'],
-    WEATHER: ['☀️', '🌧️', '❄️', '☁️', '🌈', '⛈️', '💨', '🌤️', '⛅', '🌥️', '🌦️', '🌨️', '💧', '⚡'],
-    STATES: ['😊', '😴', '🤔', '😋', '😰', '😎', '🥱', '🤗', '🤩', '😌', '🥰', '😅', '😂', '🤪', '😵‍💫'],
-    NATURE: ['🌳', '🌸', '🍃', '💐', '🌺', '🦋', '🐝', '🌻', '🌷', '🌹', '🏵️', '🌼', '🍂', '🌿', '🪴'],
-    REACTIONS: ['❓', '❗', '💭', '💬', '👀', '👍', '😅', '🤷', '👏', '🙌', '✌️', '🤝', '💪'],
-    RANDOM: ['🎵', '✨', '💫', '⭐', '🎨', '🎭', '🎪', '🎈', '🎉', '🎊', '🏆', '🎯', '🎲'],
-    PHILOSOPHY: ['🤔', '💭', '🌌', '🔮', '📚', '🧠', '💡', '🤯', '🌟', '🪐'],
-    GOSSIP: ['👀', '🤫', '😏', '🗣️', '👂', '💬', '😳', '🤭', '👁️'],
-    EXCITEMENT: ['🤩', '🎉', '🥳', '💃', '🕺', '🙌', '🎊', '🎈', '✨', '💥'],
-    COMPLAINT: ['😤', '😑', '🙄', '😒', '😮‍💨', '😩', '😫', '🤦', '💢'],
-    FRIENDSHIP: ['🤝', '💕', '🥰', '😊', '🫂', '💖', '🌈', '✨'],
-    MYSTERY: ['👻', '🎃', '🌙', '⭐', '🔮', '🪄', '✨', '🌟', '💫']
+    FOOD: ['🌽', '🍞', '🐛', '🌰', '🍇', '🥜', '🌾', '🍒', '🫐', '🍓', '🌻', '🥐', '🧀', '🥨', '🍎', '🥕', '🥗', '🍕'],
+    WEATHER: ['☀️', '🌧️', '❄️', '☁️', '🌈', '⛈️', '💨', '🌤️', '⛅', '🌥️', '🌦️', '🌨️', '💧', '⚡', '🌪️', '🌫️'],
+    STATES: ['😊', '😴', '🤔', '😋', '😰', '😎', '🥱', '🤗', '🤩', '😌', '🥰', '😅', '😂', '🤪', '😵‍💫', '🙃', '😇', '🤓'],
+    NATURE: ['🌳', '🌸', '🍃', '💐', '🌺', '🦋', '🐝', '🌻', '🌷', '🌹', '🏵️', '🌼', '🍂', '🌿', '🪴', '🐛', '🦗', '🪲', '🌾'],
+    REACTIONS: ['❓', '❗', '💭', '💬', '👀', '👍', '😅', '🤷', '👏', '🙌', '✌️', '🤝', '💪', '🙏', '🤞', '👋', '🤙'],
+    RANDOM: ['🎵', '✨', '💫', '⭐', '🎨', '🎭', '🎪', '🎈', '🎉', '🎊', '🏆', '🎯', '🎲', '🎮', '🎬', '📸', '🎀'],
+    PHILOSOPHY: ['🤔', '💭', '🌌', '🔮', '📚', '🧠', '💡', '🤯', '🌟', '🪐', '♾️', '🔬', '🧬', '⚛️'],
+    GOSSIP: ['👀', '🤫', '😏', '🗣️', '👂', '💬', '😳', '🤭', '👁️', '🫢', '🙊', '💅', '☕'],
+    EXCITEMENT: ['🤩', '🎉', '🥳', '💃', '🕺', '🙌', '🎊', '🎈', '✨', '💥', '🔥', '⚡', '🌟', '🎆'],
+    COMPLAINT: ['😤', '😑', '🙄', '😒', '😮‍💨', '😩', '😫', '🤦', '💢', '😾', '🤨', '😬', '😵'],
+    FRIENDSHIP: ['🤝', '💕', '🥰', '😊', '🫂', '💖', '🌈', '✨', '💝', '❤️', '🤗', '😘', '💞'],
+    MYSTERY: ['👻', '🎃', '🌙', '⭐', '🔮', '🪄', '✨', '🌟', '💫', '🌌', '🕯️', '🗝️', '🔑'],
+    ADVENTURE: ['🗺️', '🧭', '⛰️', '🏔️', '🏕️', '🎒', '🥾', '🏹', '⚔️', '🛡️', '🏴‍☠️', '⛵', '🚀'],
+    CELEBRATION: ['🎂', '🎁', '🎊', '🎉', '🥳', '🍾', '🥂', '🎈', '🎆', '🎇', '✨', '🎀', '🏅'],
+    SEASONS: ['🌸', '☀️', '🍂', '❄️', '🌺', '🌻', '🍁', '⛄', '🌷', '🏖️', '🍃', '🌨️'],
+    DRAMA: ['😱', '😨', '🫣', '😲', '🤯', '💀', '😵', '🆘', '⚠️', '❌', '🚨', '💥'],
+    WISDOM: ['🦉', '📖', '🧙', '⏳', '🎓', '🏛️', '🗿', '💎', '👑', '🏺', '📜', '🕊️']
 };
 
 // Sentinel rotation tracking
@@ -1990,6 +1995,10 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             'Hazel', 'Indigo', 'Sapphire', 'Sienna', 'Topaz', 'Crimson', 'Azure', 'Olive',
             'Aspen', 'Cypress', 'Juniper', 'Magnolia', 'Sequoia', 'Sycamore', 'Zinnia', 'Azalea',
             'Canyon', 'Delta', 'Echo', 'Frost', 'Glacier', 'Harbor', 'Mesa', 'Prairie',
+            // More nature names (10 new)
+            'Ember', 'Breeze', 'Summit', 'Valley', 'Ridge', 'Meadow', 'Wren', 'Sparrow',
+            'Phoenix', 'Raven', 'Hawk', 'Falcon', 'Sterling', 'Obsidian', 'Garnet', 'Opal',
+            'Cobalt', 'Mist', 'Thunder', 'Lightning',
             // Normal American names
             'Alex', 'Sam', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Quinn',
             'Charlie', 'Jamie', 'Blake', 'Drew', 'Parker', 'Avery', 'Reese', 'Harper',
@@ -2008,7 +2017,11 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
             // Additional American names
             'William', 'Seth', 'Justin', 'Michelle', 'Romeo', 'Elizabeth', 'Anne', 'Brandon',
             'Samantha', 'Tyler', 'Ashley', 'Derek', 'Melissa', 'Trevor', 'Nicole', 'Dustin',
-            'Brittany', 'Marcus', 'Vanessa', 'Keith', 'Stephanie', 'Jeremy', 'Christina', 'Vincent'
+            'Brittany', 'Marcus', 'Vanessa', 'Keith', 'Stephanie', 'Jeremy', 'Christina', 'Vincent',
+            // More American names (10 new)
+            'Connor', 'Allison', 'Nathan', 'Ruby', 'Isaac', 'Julia', 'Caleb', 'Haley',
+            'Aaron', 'Jasmine', 'Wesley', 'Amber', 'Cole', 'Savannah', 'Gavin', 'Brooklyn',
+            'Hunter', 'Kaylee', 'Evan', 'Victoria'
         ];
 
         // Squirrel name pool
@@ -19588,6 +19601,26 @@ function spawnOwls() {
                 conversationType = 'NATURE';
                 primarySet = EMOJI_SETS.NATURE;
                 secondarySet = EMOJI_SETS.STATES;
+            } else if (typeRoll < 0.58) {
+                conversationType = 'ADVENTURE';
+                primarySet = EMOJI_SETS.ADVENTURE;
+                secondarySet = EMOJI_SETS.EXCITEMENT;
+            } else if (typeRoll < 0.66) {
+                conversationType = 'CELEBRATION';
+                primarySet = EMOJI_SETS.CELEBRATION;
+                secondarySet = EMOJI_SETS.FRIENDSHIP;
+            } else if (typeRoll < 0.74) {
+                conversationType = 'SEASONS';
+                primarySet = EMOJI_SETS.SEASONS;
+                secondarySet = EMOJI_SETS.NATURE;
+            } else if (typeRoll < 0.82) {
+                conversationType = 'DRAMA';
+                primarySet = EMOJI_SETS.DRAMA;
+                secondarySet = EMOJI_SETS.REACTIONS;
+            } else if (typeRoll < 0.9) {
+                conversationType = 'WISDOM';
+                primarySet = EMOJI_SETS.WISDOM;
+                secondarySet = EMOJI_SETS.PHILOSOPHY;
             } else {
                 // Truly random "show about nothing"
                 conversationType = 'ABSURD';
