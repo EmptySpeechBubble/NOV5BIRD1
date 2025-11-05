@@ -517,6 +517,19 @@
         </details>
 
         <details class="detail-section">
+            <summary>🛠️ Crash Debugging & Recovery</summary>
+            <ul>
+                <li><strong>Automatic Recovery:</strong> The simulation now has built-in crash recovery. If an error occurs, it will attempt to recover automatically.</li>
+                <li><strong>Crash Log:</strong> Press <strong>Shift+L</strong> at any time to view the crash log in the console. This shows all errors with timestamps and context.</li>
+                <li><strong>Persistent Logging:</strong> Crash logs are saved to localStorage and survive page refreshes, perfect for debugging overnight runs.</li>
+                <li><strong>Health Monitoring:</strong> The simulation monitors its own health (FPS, heartbeat) and logs warnings if performance degrades.</li>
+                <li><strong>Memory Protection:</strong> Automatic cleanup of debug logs and other data structures prevents memory leaks during long runs.</li>
+                <li><strong>Console Tips:</strong> Open browser DevTools (F12) before overnight runs to see real-time health status and catch any issues.</li>
+                <li><strong>Recovery Limit:</strong> After 10 consecutive crashes, the simulation will stop to prevent browser freezing. Check the crash log for patterns.</li>
+            </ul>
+        </details>
+
+        <details class="detail-section">
             <summary>✨ Special Events & Phenomena</summary>
             <ul>
                 <li><strong>Meteor Showers:</strong> Rare nighttime celestial events with streaking meteors. Birds become alarmed and may take shelter!</li>
@@ -571,7 +584,8 @@
         <details class="detail-section">
             <summary>📋 Recent Major Updates</summary>
             <ul>
-                <li><strong>V40 - Ultimate Chill Overhaul (LATEST):</strong> Birds now truly relaxed! Perch throughout entire tree canopies (25 spots per tree), land and stay on ground with proper thresholds (30px), enforced ground positioning prevents drift. Extended behavior durations: 6min perched, 2.5min sleeping, 2min hopping, 30s feeding, 20s pecking, 5s flying. Player food gets 80% investigation priority even when not hungry. Rare birds (1.5%) auto-noted in diary. Rare tall trees (2% spawn, 33% taller). Fixed screenshot function and wind chime timing. This is the calm, contemplative bird experience!</li>
+                <li><strong>V40.1 - Crash Prevention & Recovery (LATEST):</strong> Major stability improvements for overnight runs! Added comprehensive crash logging system with persistent localStorage storage (Shift+L to view). Automatic error recovery in main game loop prevents crashes from stopping simulation. Memory leak fixes for debug log throttling. Simulation health monitoring with heartbeat detection. All errors are now caught, logged with full context, and recovered from automatically. Perfect for leaving the simulation running overnight!</li>
+                <li><strong>V40 - Ultimate Chill Overhaul:</strong> Birds now truly relaxed! Perch throughout entire tree canopies (25 spots per tree), land and stay on ground with proper thresholds (30px), enforced ground positioning prevents drift. Extended behavior durations: 6min perched, 2.5min sleeping, 2min hopping, 30s feeding, 20s pecking, 5s flying. Player food gets 80% investigation priority even when not hungry. Rare birds (1.5%) auto-noted in diary. Rare tall trees (2% spawn, 33% taller). Fixed screenshot function and wind chime timing. This is the calm, contemplative bird experience!</li>
                 <li><strong>V39 - Behavior & Duration Fixes:</strong> Fixed critical bug where MIN_STATE_DURATION overrode flying time. Extended all behavior durations for visibility. Birds now display natural, observable behaviors instead of rapid state-switching.</li>
                 <li><strong>Sleep System & Visual Polish:</strong> Birds sleep at night with floating "ZzZz", 8 colorful koi varieties, 95% accurate weather forecasts, smooth sky gradients, baby bird hover info, perfected camera centering</li>
                 <li><strong>Special Events & UFO System:</strong> Meteor showers, eclipses, migration waves, and UFO encounters! All with mushroom mode support.</li>
@@ -619,7 +633,7 @@
     <script>
         // ========================================
         // BIRD WINDOW - Garden Ecosystem Simulator
-        // Version: V40 (Ultimate Chill Overhaul)
+        // Version: V40.1 (Crash Prevention & Recovery)
         // ========================================
         // A relaxing, contemplative birdwatching experience featuring:
         // - Extended behavior durations (6min perched, 2min hopping)
@@ -627,6 +641,7 @@
         // - Enforced ground positioning for natural hopping
         // - Comprehensive ecosystem with 40+ interacting systems
         // - Weather, special events, garden diary, and more
+        // - Crash recovery & logging for overnight stability
         // ========================================
 
         // Debug mode with severity levels
@@ -643,7 +658,23 @@
         
         // Limit Debug Logging with throttling
         window.debugLogThrottling = {};
-        
+
+        // Clean up old throttling entries every 60 seconds to prevent memory leak
+        setInterval(() => {
+            const now = Date.now();
+            const keys = Object.keys(window.debugLogThrottling);
+            for (const key of keys) {
+                // Remove entries older than 60 seconds
+                if (now - window.debugLogThrottling[key] > 60000) {
+                    delete window.debugLogThrottling[key];
+                }
+            }
+            // Log cleanup if we removed entries
+            if (keys.length > Object.keys(window.debugLogThrottling).length) {
+                console.log(`DEBUG: Cleaned up ${keys.length - Object.keys(window.debugLogThrottling).length} old throttling entries`);
+            }
+        }, 60000);
+
         function debugLog(message, level = DEBUG_LEVELS.INFO) {
             if (debugMode && level >= currentDebugLevel) {
                 // Add throttling for common messages to reduce console spam
@@ -651,9 +682,9 @@
                     // Use message hashing to track frequency
                     const messageHash = message.split(' ')[0] + message.split(' ')[1];
                     const now = Date.now();
-                    
+
                     // Only log this type of message once every 5 seconds
-                    if (!window.debugLogThrottling[messageHash] || 
+                    if (!window.debugLogThrottling[messageHash] ||
                         now - window.debugLogThrottling[messageHash] > 5000) {
                         console.log(`DEBUG: ${message}`);
                         window.debugLogThrottling[messageHash] = now;
@@ -664,6 +695,142 @@
                 }
             }
         }
+
+        // ===========================================
+        // CRASH LOGGING & RECOVERY SYSTEM
+        // ===========================================
+        let crashLog = [];
+        const MAX_CRASH_LOG_ENTRIES = 20;
+        let consecutiveCrashes = 0;
+        let lastCrashTime = 0;
+
+        function logCrash(error, context = '') {
+            const crashEntry = {
+                timestamp: new Date().toISOString(),
+                error: error.toString(),
+                stack: error.stack || 'No stack trace',
+                context: context,
+                simulationTime: simulationTime || 0,
+                dayCount: dayNightCycleCount || 0,
+                entityCounts: {
+                    birds: (typeof birds !== 'undefined' ? birds.length : 0),
+                    trees: (typeof trees !== 'undefined' ? trees.length : 0),
+                    rats: (typeof rats !== 'undefined' ? rats.length : 0),
+                    squirrels: (typeof squirrels !== 'undefined' ? squirrels.length : 0)
+                }
+            };
+
+            crashLog.push(crashEntry);
+
+            // Keep only last MAX_CRASH_LOG_ENTRIES
+            if (crashLog.length > MAX_CRASH_LOG_ENTRIES) {
+                crashLog.shift();
+            }
+
+            // Log to console
+            console.error('=== CRASH DETECTED ===');
+            console.error('Time:', crashEntry.timestamp);
+            console.error('Error:', crashEntry.error);
+            console.error('Context:', crashEntry.context);
+            console.error('Stack:', crashEntry.stack);
+            console.error('Entity counts:', crashEntry.entityCounts);
+            console.error('====================');
+
+            // Store in localStorage for persistence across refreshes
+            try {
+                localStorage.setItem('birdSimulationCrashLog', JSON.stringify(crashLog));
+            } catch (e) {
+                console.warn('Failed to save crash log to localStorage:', e);
+            }
+
+            return crashEntry;
+        }
+
+        // Load previous crash log from localStorage
+        try {
+            const savedCrashLog = localStorage.getItem('birdSimulationCrashLog');
+            if (savedCrashLog) {
+                crashLog = JSON.parse(savedCrashLog);
+                if (crashLog.length > 0) {
+                    console.warn(`Loaded ${crashLog.length} previous crash entries from localStorage`);
+                    console.warn('Last crash:', crashLog[crashLog.length - 1]);
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load crash log from localStorage:', e);
+        }
+
+        // Global error handlers
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            logCrash(error || new Error(msg), 'Global error handler');
+            return false; // Let the error propagate
+        };
+
+        window.addEventListener('unhandledrejection', function(event) {
+            logCrash(new Error(event.reason), 'Unhandled promise rejection');
+        });
+
+        // Function to display crash log in UI
+        function showCrashLog() {
+            if (crashLog.length === 0) {
+                alert('No crashes recorded. Simulation is running smoothly!');
+                return;
+            }
+
+            let logText = '=== CRASH LOG ===\n\n';
+            crashLog.forEach((entry, i) => {
+                logText += `Crash #${i + 1}:\n`;
+                logText += `Time: ${entry.timestamp}\n`;
+                logText += `Error: ${entry.error}\n`;
+                logText += `Context: ${entry.context}\n`;
+                logText += `Day: ${entry.dayCount}, Sim Time: ${Math.floor(entry.simulationTime / 1000)}s\n`;
+                logText += `Birds: ${entry.entityCounts.birds}, Trees: ${entry.entityCounts.trees}\n`;
+                logText += '\n';
+            });
+
+            console.log(logText);
+            alert('Crash log printed to console. Check developer tools.');
+        }
+
+        // Add keyboard shortcut to view crash log (Shift+L)
+        document.addEventListener('keydown', (e) => {
+            if (e.shiftKey && (e.key === 'l' || e.key === 'L')) {
+                showCrashLog();
+            }
+        });
+
+        // ===========================================
+        // SIMULATION HEALTH MONITORING
+        // ===========================================
+        let lastHeartbeat = Date.now();
+        let simulationHealth = 'Good';
+
+        // Heartbeat system - update every frame
+        function updateHeartbeat() {
+            lastHeartbeat = Date.now();
+        }
+
+        // Check simulation health every 5 seconds
+        setInterval(() => {
+            const now = Date.now();
+            const timeSinceHeartbeat = now - lastHeartbeat;
+
+            if (timeSinceHeartbeat > 5000) {
+                simulationHealth = 'Frozen';
+                console.error(`SIMULATION FROZEN! No heartbeat for ${Math.floor(timeSinceHeartbeat / 1000)}s`);
+            } else if (currentFPS < 15) {
+                simulationHealth = 'Poor';
+            } else if (currentFPS < 30) {
+                simulationHealth = 'Fair';
+            } else {
+                simulationHealth = 'Good';
+            }
+
+            // Log health status periodically
+            if (simulationHealth !== 'Good') {
+                console.warn(`Simulation health: ${simulationHealth} (FPS: ${currentFPS})`);
+            }
+        }, 5000);
 
         // Info panel
         const infoPanel = document.getElementById('infoPanel');
@@ -20424,16 +20591,18 @@ function spawnOwls() {
         function updateAndDraw(timestamp) {
     if (!animationRunning) return;
 
-    // Calculate delta time with a max to prevent large jumps
-    const now = Date.now();
-    let deltaTime = Math.min(100, now - lastTime);
-    lastTime = now;
+    // CRASH PROTECTION: Wrap entire update loop in try-catch
+    try {
+        // Calculate delta time with a max to prevent large jumps
+        const now = Date.now();
+        let deltaTime = Math.min(100, now - lastTime);
+        lastTime = now;
 
-    // FPS Monitoring - calculate current FPS
-    fpsFrames.push(now);
-    // Keep only frames from the last second
-    fpsFrames = fpsFrames.filter(time => now - time < 1000);
-    currentFPS = fpsFrames.length;
+        // FPS Monitoring - calculate current FPS
+        fpsFrames.push(now);
+        // Keep only frames from the last second
+        fpsFrames = fpsFrames.filter(time => now - time < 1000);
+        currentFPS = fpsFrames.length;
 
     // Performance warning if FPS drops below 25 for more than 2 seconds
     if (currentFPS < 25 && now - lastFPSWarningTime > 5000) {
@@ -21071,7 +21240,49 @@ for (let i = owls.length - 1; i >= 0; i--) {
     // Restore canvas state after camera transformations
     ctx.restore();
 
-    // Request next frame
+    // Update heartbeat to indicate simulation is running
+    updateHeartbeat();
+
+    // Reset consecutive crash counter on successful frame
+    consecutiveCrashes = 0;
+
+    } catch (error) {
+        // CRASH RECOVERY: Log the error and attempt to recover
+        logCrash(error, 'Main game loop (updateAndDraw)');
+
+        const now = Date.now();
+        consecutiveCrashes++;
+
+        // Check if crashes are happening too frequently
+        if (now - lastCrashTime < 5000) {
+            console.error(`Consecutive crash #${consecutiveCrashes} detected!`);
+        } else {
+            // Reset counter if crashes are spaced out
+            consecutiveCrashes = 1;
+        }
+        lastCrashTime = now;
+
+        // If too many consecutive crashes, give up
+        if (consecutiveCrashes > 10) {
+            console.error('TOO MANY CONSECUTIVE CRASHES! Stopping simulation to prevent browser freeze.');
+            console.error('Press Shift+L to view crash log.');
+            animationRunning = false;
+            alert('Simulation crashed repeatedly. Check console (Shift+L for crash log).');
+            return;
+        }
+
+        // Try to recover by restoring canvas state
+        try {
+            ctx.restore();
+        } catch (e) {
+            console.warn('Failed to restore canvas context:', e);
+        }
+
+        // Log recovery attempt
+        console.warn(`Attempting recovery from crash #${consecutiveCrashes}...`);
+    }
+
+    // Request next frame (always request, even after error for recovery)
     requestAnimationFrame(updateAndDraw);
 }
 
