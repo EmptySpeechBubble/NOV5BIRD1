@@ -2131,10 +2131,16 @@ let rainsCompleted = 0; // Track number of completed rain events (for pond forma
         const BIRD_POOP_DELAY = 360000; // 6 minutes between poops
         const TREE_DEGRADATION_RATE = 0.25;
         const TREE_HEALTH_THRESHOLD = 0;
-        const BIRD_VISION_RADIUS = 400; // Reduced from 500 for better gameplay balance
-        const BIRD_FOOD_VISION_RADIUS = 800; // Reduced from 1080 for better balance
+        const BIRD_VISION_RADIUS = 400; // Base value - scaled by getResponsiveScale()
+        const BIRD_FOOD_VISION_RADIUS = 800; // Base value - scaled by getResponsiveScale()
         const RAT_VISION_RADIUS = 80;
         const SQUIRREL_VISION_RADIUS = 70;
+
+        // Helper function to get scaled vision radius for current canvas size
+        function getScaledVisionRadius(baseRadius) {
+            const scale = getResponsiveScale();
+            return baseRadius * scale;
+        }
         const STAR_COUNT = 100;
         const WORM_WIGGLE_SPEED = 0.1;
         const MAX_RATS = 5; // Reduced from 6
@@ -2810,10 +2816,15 @@ function createFlower(x, y) {
                                 const numNotes = 2 + Math.floor(Math.random() * 2); // 2-3 notes
                                 const startIdx = Math.floor(Math.random() * (chimeNotes.length - 1));
 
+                                // CRASH FIX: Wrap setTimeout callbacks in try-catch
                                 for (let i = 0; i < numNotes; i++) {
                                     setTimeout(() => {
-                                        const noteIdx = (startIdx + i) % chimeNotes.length;
-                                        playNote(chimeNotes[noteIdx], 4);
+                                        try {
+                                            const noteIdx = (startIdx + i) % chimeNotes.length;
+                                            playNote(chimeNotes[noteIdx], 4);
+                                        } catch (e) {
+                                            console.error("Error in wind chime collision playback:", e);
+                                        }
                                     }, i * 60); // Quick succession - 60ms apart
                                 }
 
@@ -8688,9 +8699,10 @@ if (timeOfDay < 1 && Math.random() < 0.001) {
                 // Try to find food or worms
                 let foundFood = false;
 
-                // Expanded vision radius when hungry
+                // Expanded vision radius when hungry - use scaled radius
+                const baseVision = getScaledVisionRadius(BIRD_FOOD_VISION_RADIUS);
                 const visionRadius = this.hunger > HUNGER_CRITICAL_THRESHOLD ?
-                    BIRD_FOOD_VISION_RADIUS * 2 : BIRD_FOOD_VISION_RADIUS * 1.5;
+                    baseVision * 2 : baseVision * 1.5;
 
                 // Enhanced: Check for large food piles (ground flocking behavior with crowding)
                 // Count food items in clusters - tighter radius for concentrated piles
@@ -8971,9 +8983,9 @@ if (timeOfDay < 1 && Math.random() < 0.001) {
             findTwigs() {
                 // Find twigs to build nest
                 let foundTwig = false;
-                
-                // Increased vision radius
-                const twigsVisionRadius = BIRD_VISION_RADIUS * 2; // Doubled vision for twigs
+
+                // Increased vision radius - use scaled radius
+                const twigsVisionRadius = getScaledVisionRadius(BIRD_VISION_RADIUS) * 2; // Doubled vision for twigs
                 
                 for (const twig of twigs) {
                     if (distance(this.x, this.y, twig.x, twig.y) < twigsVisionRadius) {
@@ -9358,13 +9370,14 @@ if (timeOfDay < 1 && Math.random() < 0.001) {
                 
                 // If no baby found in own nest, look for any baby
                 if (!targetBaby) {
+                    const scaledVision = getScaledVisionRadius(BIRD_VISION_RADIUS) * 1.5;
                     for (const baby of babyBirds) {
                         const dist = distance(this.x, this.y, baby.x, baby.y);
                         // Factor in how long since last feeding to prioritize hungrier babies
                         const hungerFactor = baby.timeSinceLastMeal * 2;
                         const weightedDist = dist - hungerFactor;
-                        
-                        if (weightedDist < closestDist && dist < BIRD_VISION_RADIUS * 1.5) {
+
+                        if (weightedDist < closestDist && dist < scaledVision) {
                             closestDist = weightedDist;
                             targetBaby = baby;
                         }
@@ -10988,10 +11001,12 @@ if ((isRaining || timeOfDay >= 1) && Math.random() < 0.4) { // 40% chance to see
 
                         // End resting after a while or if hungry
                         if (this.stateTimer > BIRD_STATE_DURATION.RESTING || this.hunger > HUNGER_CRITICAL_THRESHOLD - 100) {
-                            // FIXED: Remove bird from birdhouse when leaving
+                            // FIXED: Remove bird from birdhouse when leaving AND feed them!
                             if (myBirdhouse) {
                                 myBirdhouse.removeOccupant(this);
-                                debugLog(`Bird left birdhouse at (${myBirdhouse.x}). Occupants: ${myBirdhouse.occupants.length}/${myBirdhouse.maxOccupants}`);
+                                // FIX: Birds leaving birdhouse are well-rested and fed
+                                this.hunger = Math.max(0, this.hunger - 200); // Reduce hunger significantly
+                                debugLog(`Bird left birdhouse at (${myBirdhouse.x}) feeling refreshed and fed. Hunger: ${this.hunger}. Occupants: ${myBirdhouse.occupants.length}/${myBirdhouse.maxOccupants}`);
                             }
 
                             if (this.hunger > HUNGER_CRITICAL_THRESHOLD - 100) {
@@ -11057,9 +11072,18 @@ if ((isRaining || timeOfDay >= 1) && Math.random() < 0.4) { // 40% chance to see
 
                             // FIXED: Wake up to appropriate state
                             if (sleepingBirdhouse) {
-                                // Return to resting in birdhouse
-                                this.state = BIRD_STATES.RESTING;
-                                debugLog(`Bird woke up in birdhouse at (${sleepingBirdhouse.x})`);
+                                // FIX: Birds waking up in birdhouse at dawn are well-rested and should leave fed
+                                if (isDaytime) {
+                                    // Morning - leave birdhouse refreshed
+                                    sleepingBirdhouse.removeOccupant(this);
+                                    this.hunger = Math.max(0, this.hunger - 200); // Well fed from overnight
+                                    this.state = BIRD_STATES.FLYING;
+                                    debugLog(`Bird left birdhouse at dawn feeling refreshed. Hunger: ${this.hunger}`);
+                                } else {
+                                    // Woke up for other reasons - return to resting in birdhouse
+                                    this.state = BIRD_STATES.RESTING;
+                                    debugLog(`Bird woke up in birdhouse at (${sleepingBirdhouse.x})`);
+                                }
                             } else {
                                 // Return to perching
                                 this.state = BIRD_STATES.PERCHED;
@@ -19338,21 +19362,29 @@ function spawnOwls() {
         }
 
         function playNote(note, duration = 4) {
-            // ENHANCED: Try to recover audio context if it's not available
-            if (!audioContext) {
-                if (!recoverAudioContext()) {
-                    debugLog("Audio context unavailable and recovery failed");
+            // CRASH FIX: Wrap entire function in try-catch to prevent audio crashes
+            try {
+                // ENHANCED: Try to recover audio context if it's not available
+                if (!audioContext) {
+                    if (!recoverAudioContext()) {
+                        debugLog("Audio context unavailable and recovery failed");
+                        return;
+                    }
+                }
+
+                // Check if audio context is in a usable state
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().catch(err => {
+                        console.error("Failed to resume audio context in playNote:", err);
+                    });
+                    return; // Skip this note, try again next time
+                }
+
+                // Additional safety check
+                if (audioContext.state === 'closed') {
+                    console.error("Audio context is closed, cannot play note");
                     return;
                 }
-            }
-
-            // Check if audio context is in a usable state
-            if (audioContext.state === 'suspended') {
-                audioContext.resume().catch(err => {
-                    console.error("Failed to resume audio context in playNote:", err);
-                });
-                return; // Skip this note, try again next time
-            }
 
             // CRITICAL: Safety check - ensure windChimeSounds exists and note is valid
             if (!windChimeSounds || !windChimeSounds[note]) {
@@ -19417,11 +19449,20 @@ function spawnOwls() {
                 oscillator.stop(audioContext.currentTime + duration);
                 harmonicOscillators.forEach(h => h.osc.stop(audioContext.currentTime + duration));
             } catch (e) {
-                console.error("Error playing note:", e);
+                console.error("Error playing note (inner):", e);
                 // ENHANCED: Attempt recovery if audio context failed
                 if (e.message && (e.message.includes('AudioContext') || e.message.includes('destination'))) {
                     debugLog("Audio context error detected, attempting recovery...");
                     recoverAudioContext();
+                }
+            }
+            } catch (outerError) {
+                // CRASH FIX: Catch any errors in the entire playNote function
+                console.error("Critical error in playNote (outer):", outerError);
+                console.error("Stack:", outerError.stack);
+                // Log crash for debugging
+                if (typeof logCrash === 'function') {
+                    logCrash(outerError, 'playNote function');
                 }
             }
         }
